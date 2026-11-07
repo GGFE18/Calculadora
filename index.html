@@ -227,7 +227,7 @@ details[open] summary::before{transform:rotate(90deg)}
 <script src="nucleo.js"></script>
 <script>
 'use strict';
-const N = window.Nucleo, { d, fmt } = N, VERSION = '1.7 · 07/11/2026';
+const N = window.Nucleo, { d, fmt } = N, VERSION = '1.9 · 07/11/2026';
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const guardado = (k, def) => { try { const v = localStorage.getItem('zc_' + k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } };
 const guardar = (k, v) => { try { localStorage.setItem('zc_' + k, JSON.stringify(v)); } catch (e) {} };
@@ -276,7 +276,7 @@ function formatear(el, k) {
 seg('#sReg', C, 'reg', pintarCalc); seg('#sMon', C, 'mon', pintarCalc);
 $$('[data-k]').forEach(el => {
   el.addEventListener('input', () => { C[el.dataset.k] = el.value; calcular(); });
-  el.addEventListener('change', () => { formatear(el, el.dataset.k); C[el.dataset.k] = el.value; calcular(); });
+  el.addEventListener('change', () => { formatear(el, el.dataset.k); C[el.dataset.k] = el.value; calcular(); if (['cusd', 'creal'].includes(el.dataset.k)) guardarMano(); });
 });
 $('#segAuto').onchange = e => { C.segAuto = e.target.checked; $('#inSeg').disabled = C.segAuto; if (C.segAuto) { $('#inSeg').value = ''; C.seguro = ''; } calcular(); };
 
@@ -453,11 +453,21 @@ function vaciar() { if (!ITEMS.length) return; if (!confirm('¿Vaciar la lista d
    KITAPP usa la del BCP del día hábil anterior: "dias[0]" ya es esa. Se puede elegir otro día o escribir a mano. */
 let DIA = 0;
 const diasCot = () => COT ? (COT.dias && COT.dias.length ? COT.dias : [{ fecha: COT.fecha, usd: COT.usd, brl: COT.brl }]) : [];
+// cambio escrito a mano: el celular lo recuerda con su fecha
+const hoyTxt = () => { const f = new Date(); return String(f.getDate()).padStart(2, '0') + '/' + String(f.getMonth() + 1).padStart(2, '0') + '/' + f.getFullYear(); };
+function guardarMano() { guardar('cambio_mano', { usd: C.cusd || '', brl: C.creal || '', fecha: hoyTxt() }); pintarCot(); }
 function pintarCot() {
   const L = diasCot();
-  if (!L.length) { $('#cot').innerHTML = '<span class="pill g">Sin cotización guardada</span> escribí el cambio a mano'; return; }
-  const x = L[Math.min(DIA, L.length - 1)];
-  $('#cot').innerHTML = `<select id="cotDia" class="pill g" style="border:none;font:inherit;font-weight:700;padding:5px 8px">${L.map((y, k) => `<option value="${k}" ${k === DIA ? 'selected' : ''}>BCP ${esc(y.fecha)}${k === 0 ? ' · KITAPP' : ''}</option>`).join('')}</select> USD ${esc(x.usd)}${x.brl ? ' · R$ ' + esc(x.brl) : ''}`;
+  if (!L.length) {
+    const m = guardado('cambio_mano', null);
+    $('#cot').innerHTML = !m || !(m.usd || m.brl) ? '<span class="pill g">Sin cambio guardado</span> escribilo abajo (el de KITAPP)'
+      : m.fecha === hoyTxt() ? `<span class="pill ok">Cambio de hoy</span> escrito a mano`
+      : `<span class="pill w">Cambio del ${esc(m.fecha)}</span> revisá si cambió en KITAPP`;
+    return;
+  }
+  const x = L[Math.min(DIA, L.length - 1)], kit = COT.fuente === 'KITAPP';
+  const viejo = DIA === 0 && L[0].fecha !== hoyTxt();     // Zzzz todavía no publicó la de hoy
+  $('#cot').innerHTML = `<select id="cotDia" class="pill ${viejo ? 'w' : 'g'}" style="border:none;font:inherit;font-weight:700;padding:5px 8px">${L.map((y, k) => `<option value="${k}" ${k === DIA ? 'selected' : ''}>${kit ? 'KITAPP' : 'BCP'} ${esc(y.fecha)}${k === 0 && !kit ? ' · KITAPP' : ''}</option>`).join('')}</select> USD ${esc(x.usd)}${x.brl ? ' · R$ ' + esc(x.brl) : ''}${viejo ? ' · <b style="color:var(--warn)">no es de hoy</b>' : ''}`;
   $('#cotDia').onchange = e => { DIA = +e.target.value; pintarCot(); usarCot(true); };
 }
 function usarCot(forzar) {
@@ -467,7 +477,7 @@ function usarCot(forzar) {
     if (!v) continue;
     const el = $(`[data-k="${k}"]`); if (forzar || !el.value) { el.value = v; C[k] = v; }
   }
-  calcular(); if (forzar) toast('Cambio del BCP del ' + x.fecha + (DIA === 0 ? ' (el de KITAPP)' : ''));
+  calcular(); if (forzar) toast('Cambio del ' + x.fecha);
 }
 // lista de importadores publicada con la web app (datos públicos del RUC)
 async function leerImps() {
@@ -521,6 +531,7 @@ function impManual() {
 function pintarSeg() { const s = d(AJ.seg); $('#lSegPct').textContent = fmt(s, s.redondear(0, 'DOWN').cmp(s) ? 2 : 0) + ' %'; }
 
 // ---------- inicio ----------
+(() => { const m = guardado('cambio_mano', null); if (m && !diasCot().length) for (const [k, v] of [['cusd', m.usd], ['creal', m.brl]]) if (v) { $(`[data-k="${k}"]`).value = v; C[k] = v; } })();
 pintarSeg(); pintarCot(); usarCot(false); pintarCalc(); pintarBadge(); leerCot(); leerImps();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
