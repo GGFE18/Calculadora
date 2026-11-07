@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1230">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Zzzz Calculadora</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icono-192.png">
+<style>
+:root{--bg1:#0b1230;--bg2:#1a1145;--g1a:#1e6bff;--g1b:#19d3f5;--g2a:#7b3bff;--g2b:#e44bd6;--glass:rgba(255,255,255,.06);--glass2:rgba(255,255,255,.10);--line:rgba(255,255,255,.13);--txt:#eef2ff;--mut:#a5b0d6;--ok:#34d399;--err:#fb7185;--warn:#fbbf24}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:#0b1230;min-height:100%}
+html,body{margin:0;color:var(--txt);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;font-size:17px}
+body{min-height:100vh;background:radial-gradient(700px 500px at 90% 0%,color-mix(in srgb,var(--g2a) 30%,transparent),transparent 60%),radial-gradient(600px 500px at 0% 100%,color-mix(in srgb,var(--g1a) 24%,transparent),transparent 60%),linear-gradient(135deg,var(--bg1),var(--bg2));background-attachment:fixed;padding:calc(env(safe-area-inset-top) + 10px) 14px calc(env(safe-area-inset-bottom) + 92px)}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+.top{display:flex;align-items:center;gap:12px;margin:4px 2px 14px}
+.top h1{font-size:22px;margin:0;flex:1}
+.top h1 small{display:block;font-size:13px;font-weight:400;color:var(--mut)}
+.ibtn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--glass2);display:grid;place-items:center;padding:0}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:20px;padding:16px;backdrop-filter:blur(10px);margin-bottom:14px}
+.head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.head h2{font-size:19px;margin:0;flex:1}
+.ico{width:44px;height:44px;flex:none;filter:drop-shadow(0 6px 8px rgba(0,0,0,.4))}
+.seg{display:flex;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;background:none;border:none;border-radius:10px;padding:10px 8px;font-size:16px;color:var(--mut);font-weight:600}
+.seg button.on{background:linear-gradient(90deg,var(--g1a),var(--g2a));color:#fff;box-shadow:0 6px 16px rgba(30,107,255,.35)}
+.fila2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.campo{margin-top:12px;min-width:0}
+.lb{font-size:13.5px;color:var(--mut);margin:0 0 5px 2px}
+.in{width:100%;height:52px;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.22);padding:0 14px;font-size:19px;text-align:right;outline:none}
+.in.txt{text-align:left;font-size:17px}
+.in:focus{border-color:var(--g1b);box-shadow:0 0 0 3px color-mix(in srgb,var(--g1b) 25%,transparent)}
+.in::placeholder{color:#6b76a0}
+.ayuda{font-size:12.5px;color:var(--mut);margin:4px 2px 0}
+details.mas{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+details summary{list-style:none;color:var(--g1b);font-weight:600;font-size:15.5px;padding:6px 0}
+details summary::-webkit-details-marker{display:none}
+details summary::before{content:"▸ ";display:inline-block;transition:.2s}
+details[open] summary::before{transform:rotate(90deg)}
+.kpis{display:grid;gap:10px}
+.kpi{border-radius:16px;padding:12px 14px;background:var(--glass2);min-width:0;display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px}
+.kpi .l{font-size:15px;font-weight:600}
+.kpi .v{font-size:21px;font-weight:700;white-space:nowrap;grid-row:1/3;grid-column:2;text-align:right}
+.kpi .s{font-size:12px;opacity:.8}
+.kpi.a{background:linear-gradient(135deg,#1e6bff,#19d3f5)}
+.kpi.b{background:linear-gradient(135deg,#0f9d8a,#34d399)}
+.kpi.c{background:linear-gradient(135deg,#7b3bff,#e44bd6)}
+.kpi.d{background:linear-gradient(135deg,#b45309,#f59e0b)}
+.kpi.t{background:linear-gradient(135deg,#1e3fae,#7b3bff);box-shadow:0 10px 26px rgba(123,59,255,.35)}
+.kpi.t .v{font-size:24px}
+.kpi.t .v.largo{font-size:15px;white-space:normal;font-weight:600}
+.kpi.vacio{opacity:.45}
+.det{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+.det td{padding:7px 2px;border-bottom:1px solid var(--line)}
+.det td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.det td small{display:block;color:var(--mut);font-size:12px}
+.det tr.tot td{font-weight:700;border-bottom:none}
+.pill{font-size:13px;padding:4px 10px;border-radius:999px;font-weight:700;white-space:nowrap}
+.pill.ok{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.pill.err{background:color-mix(in srgb,var(--err) 22%,transparent);color:var(--err)}
+.pill.g{background:var(--glass2);color:var(--mut)}
+.pill.w{background:color-mix(in srgb,var(--warn) 20%,transparent);color:var(--warn)}
+.alc{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.alc:last-child{border-bottom:none}
+.alc .m{flex:1;min-width:0}
+.alc .m b{display:block;font-size:15px}
+.alc .m span{font-size:13px;color:var(--mut)}
+.alc .in{height:44px;font-size:17px;margin-top:6px}
+.btn{height:52px;border-radius:14px;border:1px solid var(--line);background:var(--glass2);font-weight:600;font-size:16px;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn.p{background:linear-gradient(90deg,var(--g1a),var(--g2a));border:none;color:#fff;box-shadow:0 8px 20px rgba(30,107,255,.35)}
+.btn.wa{background:linear-gradient(90deg,#0f9d58,#25d366);border:none;color:#fff}
+.botones{display:grid;gap:10px;margin-top:14px}
+.prev{background:#0b141a;border-radius:14px;padding:12px 14px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;word-break:break-word;margin-top:12px;border:1px solid var(--line)}
+.prev .mono{font-family:Consolas,"Roboto Mono","Courier New",monospace;white-space:pre;display:block;overflow-x:auto}
+.nota{font-size:13.5px;color:var(--mut);background:var(--glass);border-left:3px solid var(--warn);border-radius:10px;padding:10px 12px;margin-top:12px}
+.cot{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut);margin:-4px 2px 12px;flex-wrap:wrap}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;gap:6px;padding:8px 10px calc(env(safe-area-inset-bottom) + 8px);background:rgba(11,18,48,.88);backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:5}
+.tabs button{flex:1;background:none;border:none;border-radius:14px;padding:6px 4px;color:var(--mut);font-size:12.5px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabs button svg{width:30px;height:30px;opacity:.6}
+.tabs button.on{color:#fff;background:var(--glass2)}
+.tabs button.on svg{opacity:1}
+.vista{display:none}.vista.on{display:block;animation:ap .25s ease}
+@keyframes ap{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:#111a3d;border:1px solid var(--line);padding:12px 18px;border-radius:14px;opacity:0;transition:.25s;pointer-events:none;z-index:9;font-size:15px;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;z-index:8}
+.modal.on{display:flex}
+.modal .caja{background:#141a40;border-top-left-radius:22px;border-top-right-radius:22px;border:1px solid var(--line);width:100%;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px);max-height:88vh;overflow:auto}
+.est{font-size:11.5px;padding:1px 7px;border-radius:999px;margin-left:4px;vertical-align:1px}
+.est.sup{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
+.sel{position:relative}
+.sel .in{text-align:left;font-size:17px;padding-right:44px}
+.sel .x{position:absolute;right:6px;top:6px;width:40px;height:40px;border:none;background:none;color:var(--mut);font-size:22px}
+.lista{margin-top:6px;border:1px solid var(--line);border-radius:14px;background:#121a45;max-height:calc(5 * 58px + 2px);overflow-y:auto;display:none}
+.lista.on{display:block}
+.lista button{display:flex;width:100%;align-items:center;gap:10px;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);min-height:58px;padding:8px 14px}
+.lista button:last-child{border-bottom:none}
+.lista button b{display:block;font-size:15.5px}
+.lista button span{font-size:12.5px;color:var(--mut)}
+.lista button .m{flex:1;min-width:0}
+.lista .sep{font-size:12px;color:var(--g1b);padding:6px 14px;background:rgba(255,255,255,.04);font-weight:700}
+.badge{position:absolute;margin-left:22px;margin-top:-4px;background:var(--err);color:#fff;border-radius:999px;font-size:11px;min-width:18px;height:18px;line-height:18px;padding:0 5px}
+.tabs button{position:relative}
+.item{display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item .m{flex:1;min-width:0}
+.item .m input{width:100%;background:none;border:none;border-bottom:1px dashed var(--line);font-size:16px;font-weight:700;padding:2px 0;outline:none}
+.item .m span{font-size:12.5px;color:var(--mut)}
+.item .v{text-align:right;font-weight:700;white-space:nowrap}
+.item .v small{display:block;font-weight:400;font-size:12px;color:var(--mut)}
+.item .q{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--glass2);font-size:18px;color:var(--err)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+ <defs>
+  <linearGradient id="gA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b8cff"/><stop offset="1" stop-color="#1e3fae"/></linearGradient>
+  <linearGradient id="gB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#34d399"/><stop offset="1" stop-color="#0f766e"/></linearGradient>
+  <linearGradient id="gC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e44bd6"/><stop offset="1" stop-color="#5b21b6"/></linearGradient>
+  <linearGradient id="gD" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbbf24"/><stop offset="1" stop-color="#c2410c"/></linearGradient>
+  <linearGradient id="gW" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ade80"/><stop offset="1" stop-color="#15803d"/></linearGradient>
+  <linearGradient id="brillo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".45"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <symbol id="i-calc" viewBox="0 0 48 48"><rect x="6" y="3" width="36" height="42" rx="9" fill="url(#gA)"/><rect x="6" y="3" width="36" height="21" rx="9" fill="url(#brillo)"/><rect x="12" y="9" width="24" height="9" rx="3" fill="#0b1230" opacity=".75"/><g fill="#fff"><circle cx="16" cy="26" r="3"/><circle cx="24" cy="26" r="3"/><circle cx="32" cy="26" r="3"/><circle cx="16" cy="35" r="3"/><circle cx="24" cy="35" r="3"/></g><rect x="29" y="31" width="6" height="8" rx="3" fill="#19d3f5"/></symbol>
+  <symbol id="i-barco" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="11" fill="url(#gB)"/><rect x="3" y="3" width="42" height="21" rx="11" fill="url(#brillo)"/><path d="M10 28h28l-4 9H14z" fill="#fff"/><rect x="15" y="18" width="8" height="8" rx="1.5" fill="#fde68a"/><rect x="25" y="14" width="8" height="12" rx="1.5" fill="#bfdbfe"/><path d="M8 40c3 0 3-2 6-2s3 2 6 2 3-2 6-2 3 2 6 2 3-2 6-2" stroke="#d1fae5" stroke-width="2" fill="none"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="11" fill="url(#gW)"/><rect x="3" y="3" width="42" height="21" rx="11" fill="url(#brillo)"/><path d="M24 11a13 13 0 0 0-11.2 19.6L11 37l6.6-1.7A13 13 0 1 0 24 11z" fill="#fff"/><path d="M19 19.5c.4-1 1.6-1 2 .1l.8 2c.2.5 0 1-.4 1.4l-.6.6a8 8 0 0 0 4 4l.6-.6c.4-.4.9-.5 1.4-.3l2 .8c1 .4 1 1.6.1 2-2 1-4.5.5-7-2s-3.4-5.3-2.9-8z" fill="#16a34a"/></symbol>
+  <symbol id="i-plata" viewBox="0 0 48 48"><rect x="3" y="3" width="42" height="42" rx="11" fill="url(#gD)"/><rect x="3" y="3" width="42" height="21" rx="11" fill="url(#brillo)"/><ellipse cx="22" cy="31" rx="10" ry="4" fill="#fde68a"/><rect x="12" y="23" width="20" height="8" fill="#fcd34d"/><ellipse cx="22" cy="23" rx="10" ry="4" fill="#fef3c7"/><circle cx="34" cy="17" r="7" fill="#fff"/><path d="M31 17l2 2 4-4" stroke="#16a34a" stroke-width="2.4" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-ajus" viewBox="0 0 48 48"><path d="M24 6l4 1 1 5 4 2 4-3 3 3-3 4 2 4 5 1v6l-5 1-2 4 3 4-3 3-4-3-4 2-1 5h-6l-1-5-4-2-4 3-3-3 3-4-2-4-5-1v-6l5-1 2-4-3-4 3-3 4 3 4-2 1-5z" fill="url(#gC)"/><circle cx="24" cy="24" r="6" fill="#141a40"/></symbol>
+ </defs>
+</svg>
+
+<div class="top">
+ <svg class="ico" style="width:46px;height:46px"><use href="#i-calc"/></svg>
+ <h1>Calculadora<small>Despachos IC04 · IM05</small></h1>
+ <button class="ibtn" onclick="abrirAjustes()" aria-label="Ajustes"><svg style="width:28px;height:28px"><use href="#i-ajus"/></svg></button>
+</div>
+<div class="cot" id="cot"></div>
+
+<!-- ===================== CÁLCULO ===================== -->
+<section class="vista on" id="v-calc">
+ <div class="card">
+  <div class="fila2">
+   <div class="seg" id="sReg"><button data-v="IC04">IC04</button><button data-v="IM05">IM05</button></div>
+   <div class="seg" id="sMon"><button data-v="DOL">USD</button><button data-v="REAL">R$</button></div>
+  </div>
+  <div class="campo" id="cImp"><p class="lb">Importador</p>
+   <div class="sel"><input class="in" id="impBusca" placeholder="Elegí el importador…" autocomplete="off"><button class="x" id="impX" aria-label="Borrar">×</button></div>
+   <div class="lista" id="impLista"></div></div>
+  <div class="campo"><p class="lb" id="lValor">Valor factura (FOB) USD</p><input class="in" data-k="valor" inputmode="decimal" placeholder="0,00"></div>
+  <div class="campo" id="cFlete"><p class="lb" id="lFlete">Flete USD</p><input class="in" data-k="flete" inputmode="decimal" placeholder="0,00"><p class="ayuda" id="aFlete"></p></div>
+  <div class="campo" id="cFleteUsd"><p class="lb">Flete del CRT en USD</p><input class="in" data-k="fleteUsd" inputmode="decimal" placeholder="0,00"><p class="ayuda" id="aFleteUsd"></p></div>
+  <div class="fila2">
+   <div class="campo"><p class="lb">Cambio USD</p><input class="in" data-k="cusd" inputmode="decimal" placeholder="0,00"></div>
+   <div class="campo" id="cCreal"><p class="lb">Cambio R$</p><input class="in" data-k="creal" inputmode="decimal" placeholder="0,00"></div>
+  </div>
+  <div class="campo" id="cBruto"><p class="lb">Kilo bruto (tasa)</p><input class="in" data-k="bruto" inputmode="numeric" placeholder="0"></div>
+  <div class="campo" id="cNeto"><p class="lb">Kilo neto (tasa)</p><input class="in" data-k="neto" inputmode="numeric" placeholder="0"></div>
+  <details class="mas" id="dMas"><summary>Más opciones <span style="color:var(--mut);font-weight:400">· sin acuerdo, días, seguro</span></summary>
+   <div class="fila2">
+    <div class="campo"><p class="lb">FOB sin acuerdo</p><input class="in" data-k="saFob" inputmode="decimal" placeholder="0,00"></div>
+    <div class="campo"><p class="lb">% derecho</p><input class="in" data-k="saPct" inputmode="decimal" placeholder="%"></div>
+   </div>
+   <div class="fila2">
+    <div class="campo" id="cDias"><p class="lb">Días en depósito</p><input class="in" data-k="dias" inputmode="numeric" placeholder="1"></div>
+    <div class="campo"><p class="lb" style="display:flex;justify-content:space-between"><span>Seguro</span><label><input type="checkbox" id="segAuto" checked style="width:16px;height:16px;vertical-align:-2px"> <span id="lSegPct">1 %</span> auto</label></p><input class="in" data-k="seguro" id="inSeg" inputmode="decimal" placeholder="automático" disabled></div>
+   </div>
+  </details>
+  <div class="fila2" id="botCalc" style="margin-top:14px"><button class="btn" onclick="limpiar()">Limpiar</button><button class="btn p" id="bAgregar" onclick="agregar()">Agregar</button></div>
+ </div>
+
+ <div class="card">
+  <div class="kpis" id="kpis"></div>
+  <details class="mas" id="dDet"><summary>Ver el detalle</summary><div id="detalle"></div></details>
+ </div>
+
+</section>
+
+<!-- ===================== WHATSAPP ===================== -->
+<section class="vista" id="v-wa">
+ <div class="card">
+  <div class="head"><svg class="ico"><use href="#i-wa"/></svg><h2>Mensaje IM05</h2></div>
+  <p class="ayuda" style="margin-top:-6px">Montos redondeados hacia arriba a miles. Tocá el nombre para cambiarlo.</p>
+  <div id="items"></div>
+  <div class="prev" id="wPrev"></div>
+  <div class="botones">
+   <button class="btn p" onclick="copiar()">Copiar mensaje</button>
+   <button class="btn" onclick="vaciar()">Vaciar la lista</button>
+  </div>
+ </div>
+ <div class="card">
+  <div class="head"><svg class="ico"><use href="#i-barco"/></svg><h2>Canon</h2></div>
+  <p class="ayuda" style="margin-top:-6px">Medio jornal por despacho + tasas portuarias. Los dos se pagan con el canon.</p>
+  <div class="fila2">
+   <div class="campo"><p class="lb">Cantidad de despachos</p><input class="in" id="cnDesp" inputmode="numeric" placeholder="0"></div>
+   <div class="campo"><p class="lb">Medio jornal</p><input class="in" id="cnJornal" disabled></div>
+  </div>
+  <div class="campo"><p class="lb">Tasas portuarias Gs. <span id="cnDe" style="color:var(--g1b)"></span></p><input class="in" id="cnTasas" inputmode="numeric" placeholder="0"></div>
+  <table class="det" id="cnDet" style="margin-top:12px"></table>
+  <div class="botones"><button class="btn p" onclick="copiarCanon()">Copiar</button></div>
+ </div>
+</section>
+
+<nav class="tabs">
+ <button data-v="calc" class="on"><svg><use href="#i-calc"/></svg>Cálculo</button>
+ <button data-v="wa"><svg><use href="#i-wa"/></svg><span class="badge" id="badge" hidden></span>WhatsApp</button>
+</nav>
+
+<div class="modal" id="mAjustes" onclick="if(event.target===this)cerrarAjustes()">
+ <div class="caja">
+  <div class="head"><svg class="ico"><use href="#i-ajus"/></svg><h2>Ajustes</h2></div>
+  <div class="campo"><p class="lb">Canon de oficialización IC04 (2,5 jornales) Gs.</p><input class="in" id="ajCanon" inputmode="numeric"><p class="ayuda">IM05 usa la quinta parte (½ jornal).</p></div>
+  <div class="campo"><p class="lb">Seguro %</p><input class="in" id="ajSeg" inputmode="decimal"><p class="ayuda">Siempre 1 % salvo que lo cambies.</p></div>
+  <div class="campo"><p class="lb">Importadores (de Zzzz)</p><p class="ayuda" id="ajImpInfo"></p>
+   <div class="fila2" style="margin-top:8px"><label class="btn" style="cursor:pointer">Cargar lista<input type="file" id="ajImpFile" accept=".json,application/json" hidden></label><button class="btn" onclick="impManual()">Agregar a mano</button></div></div>
+  <div class="nota">Este teléfono guarda los ajustes, la última cotización, la lista de importadores y el mensaje en armado. Nada de eso se sube a internet.</div>
+  <div class="botones"><button class="btn p" onclick="guardarAjustes()">Guardar</button><button class="btn" onclick="cerrarAjustes()">Cancelar</button></div>
+  <p class="ayuda" style="text-align:center;margin-top:12px" id="version"></p>
+ </div>
+</div>
+<div id="toast"></div>
+
+<script src="nucleo.js"></script>
+<script>
+'use strict';
+const N = window.Nucleo, { d, fmt } = N, VERSION = '1.5 · 06/11/2026';
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+const guardado = (k, def) => { try { const v = localStorage.getItem('zc_' + k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } };
+const guardar = (k, v) => { try { localStorage.setItem('zc_' + k, JSON.stringify(v)); } catch (e) {} };
+const ANIO = new Date().getFullYear();
+
+const AJ = Object.assign({ canon: 292692, seg: '1' }, guardado('ajustes', {}));
+const C = { reg: 'IM05', mon: 'DOL', segAuto: true, dias: '', flete: '30,00' };
+let COT = guardado('cot', null);              // {fecha, usd, brl, fuente}
+let IMPS = guardado('imps', []);              // [{ruc, n, corto, im05}] de Zzzz o a mano
+let USOS = guardado('usos', {});              // {anio: {ruc: veces agregado en el celular}}
+let ITEMS = guardado('items', []);            // mensaje en armado: [{ruc, corto, total, iva}]
+let IMP = null;                               // importador elegido
+
+const num = s => { try { return d(s || 0); } catch (e) { return null; } };
+const gsTxt = v => 'Gs. ' + fmt(v);
+const may = s => { s = String(s || '').trim(); return s ? s[0].toUpperCase() + s.slice(1).toLowerCase() : s; };
+const mil = v => Math.ceil(v / 1000) * 1000;  // redondeo hacia arriba a miles
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function toast(t) { const e = $('#toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2200); }
+
+// ---------- pestañas ----------
+$$('.tabs button').forEach(b => b.onclick = () => {
+  $$('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  $$('.vista').forEach(v => v.classList.toggle('on', v.id === 'v-' + b.dataset.v));
+  if (b.dataset.v === 'wa') pintarWA();
+  window.scrollTo(0, 0);
+});
+function seg(id, obj, key, fn) {
+  const el = $(id);
+  const marca = () => el.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === obj[key]));
+  el.querySelectorAll('button').forEach(b => b.onclick = () => { obj[key] = b.dataset.v; marca(); fn(); });
+  marca(); return marca;
+}
+
+// ---------- formato al salir del campo (como Zzzz) ----------
+function formatear(el, k) {
+  const s = el.value.trim(); if (!s) return;
+  if (['bruto', 'neto'].includes(k)) { const v = num(s.includes(',') ? s : s.replace(/\./g, '')); if (v) el.value = fmt(v, 0); return; }
+  if (k === 'dias') return;
+  const v = num(s); if (!v) return;
+  const dec = k === 'saPct' ? (s.includes(',') ? Math.min(3, s.split(',')[1].length) : (s.includes('.') ? Math.min(3, s.split('.')[1].length) : 0)) : 2;
+  el.value = fmt(v, dec);
+}
+
+// ---------- CÁLCULO ----------
+seg('#sReg', C, 'reg', pintarCalc); seg('#sMon', C, 'mon', pintarCalc);
+$$('[data-k]').forEach(el => {
+  el.addEventListener('input', () => { C[el.dataset.k] = el.value; calcular(); });
+  el.addEventListener('change', () => { formatear(el, el.dataset.k); C[el.dataset.k] = el.value; calcular(); });
+});
+$('#segAuto').onchange = e => { C.segAuto = e.target.checked; $('#inSeg').disabled = C.segAuto; if (C.segAuto) { $('#inSeg').value = ''; C.seguro = ''; } calcular(); };
+
+function pintarCalc() {
+  const im05 = C.reg === 'IM05', real = C.mon === 'REAL';
+  $('#sMon').style.visibility = im05 ? 'hidden' : 'visible';
+  $('#cImp').style.display = im05 ? '' : 'none';
+  $('#bAgregar').style.display = im05 ? '' : 'none';
+  $('#botCalc').style.gridTemplateColumns = im05 ? '' : '1fr';
+  $('#lValor').textContent = 'Valor factura (FOB) ' + (im05 || real ? 'R$' : 'USD');
+  $('#cFlete').style.display = !im05 && real ? 'none' : '';
+  $('#lFlete').textContent = im05 ? 'Flete R$' : 'Flete USD';
+  $('#aFlete').textContent = im05 ? 'R$ 30 por camión' : '';
+  $('#cFleteUsd').style.display = !im05 && real ? '' : 'none';
+  $('#cCreal').style.visibility = im05 || real ? 'visible' : 'hidden';
+  $('#cBruto').style.display = im05 ? 'none' : '';
+  $('#cNeto').style.display = im05 ? '' : 'none';
+  $('#cDias').style.visibility = im05 ? 'hidden' : 'visible';
+  calcular();
+}
+
+let R = null;   // último resultado
+function calcular() {
+  const malos = $$('[data-k]').filter(el => el.value.trim() && num(el.dataset.k === 'bruto' || el.dataset.k === 'neto' ? el.value.replace(/\./g, '').replace(',', '.') : el.value) == null);
+  $$('[data-k]').forEach(el => el.style.borderColor = malos.includes(el) ? 'var(--err)' : '');
+  try { R = malos.length ? null : N.rapido(C, AJ.seg, AJ.canon); } catch (e) { R = null; }
+  const conv = $('#aFleteUsd');
+  if (R && C.reg !== 'IM05' && C.mon === 'REAL' && C.fleteUsd && !num(C.creal).cero) conv.textContent = '= R$ ' + fmt(R.flete, 2) + ' (USD × cambio USD ÷ cambio R$)';
+  else conv.textContent = '';
+  pintarRes();
+}
+
+function kpi(cls, l, v, s, vac) { return `<div class="kpi ${cls}${vac ? ' vacio' : ''}"><div class="l">${l}</div><div class="v${v.length > 18 ? ' largo' : ''}">${v}</div><div class="s">${s}</div></div>`; }
+function pintarRes() {
+  const r = R, ok = r && r.T, im05 = C.reg === 'IM05';
+  const canon = r ? r.canon : (im05 ? N.gs(d(AJ.canon).entre(5)) : AJ.canon);
+  $('#kpis').innerHTML =
+    kpi('a', 'Total general', ok ? gsTxt(r.total) : '—', 'subcuenta del importador', !ok) +
+    kpi('b', 'Tasa portuaria', ok ? '≈ ' + gsTxt(r.T.total) : '—', 'se paga con el canon', !ok) +
+    kpi('c', 'Canon', gsTxt(canon), im05 ? '½ jornal' : '2,5 jornales', !ok) +
+    kpi('d', 'IVA despachante', ok ? '≈ ' + gsTxt(r.H.iva) : '—', '10 % del honorario', !ok) +
+    kpi('t', 'Total', ok ? '≈ ' + gsTxt(r.total + r.T.total + canon + r.H.iva) : 'Completá valor y cambio', 'todo junto', !ok);
+  if (!ok) { $('#detalle').innerHTML = '<p class="ayuda">Sin datos todavía.</p>'; return; }
+  const fila = (a, b, s) => `<tr><td>${a}${s ? `<small>${s}</small>` : ''}</td><td>${b}</td></tr>`;
+  const tot = (a, b) => `<tr class="tot"><td>${a}</td><td>${b}</td></tr>`;
+  const mon = im05 || C.mon === 'REAL' ? 'R$' : 'USD';
+  const t = r.T, est = t.est === 'sup' ? '<span class="est sup">supuesto</span>' : t.est === 'sin' ? '<span class="est sup">sin dato</span>' : '';
+  const tr = N.honorario(r.imp, d(C.cusd)).tramo, estH = tr[3] === 'supuesto' ? '<span class="est sup">supuesto</span>' : '';
+  $('#detalle').innerHTML =
+    `<p class="lb" style="margin-top:8px">Tributos</p><table class="det">` +
+    fila('FOB', mon + ' ' + fmt(r.fob, 2)) + fila('Flete', mon + ' ' + fmt(r.flete, 2)) + fila('Seguro', mon + ' ' + fmt(r.seg, 2), C.segAuto ? AJ.seg.replace('.', ',') + ' % truncado' : 'a mano') +
+    fila('CIF', mon + ' ' + fmt(r.cif, 2)) + fila('Valor imponible', gsTxt(r.imp), 'CIF × ' + fmt(r.cam, 2)) +
+    (r.da ? fila('010 Derecho aduanero', gsTxt(r.da), 'ítem sin acuerdo') : '') +
+    fila('031 Valoración 0,5 %', gsTxt(r.val)) + fila('133 IRE 0,4 %', gsTxt(r.ire)) + fila('415 IVA 10 %', gsTxt(r.iva)) + tot('Total general', gsTxt(r.total)) + `</table>` +
+    `<p class="lb" style="margin-top:14px">Tasa portuaria ANNP · valor USD ${fmt(t.vusd, 2)}</p><table class="det">` +
+    t.lineas.map((l, i) => fila(l[0] + (i === 0 ? est : ''), gsTxt(l[2]), l[1])).join('') +
+    fila('IVA ANNP 10 %', gsTxt(t.ivaAnnp)) + tot('Factura ANNP', gsTxt(t.factura)) +
+    fila('Red bancaria', gsTxt(t.red), 'dólar ÷ 1,1') + fila('Sofía – Depósito ANNP', gsTxt(t.sofia)) + fila('IVA red y Sofía', gsTxt(t.ivaOtros)) + tot('Sale del canon', gsTxt(t.total)) + `</table>` +
+    `<p class="lb" style="margin-top:14px">IVA despachante · valor USD ${fmt(r.H.vusd, 2)}</p><table class="det">` +
+    fila('Honorario' + estH, gsTxt(r.H.h), `${fmt(tr[1])} + ${fmt(tr[2], 2)} % del imponible`) + tot('IVA despachante 10 %', gsTxt(r.H.iva)) + `</table>`;
+}
+
+function limpiar() {
+  Object.assign(C, { valor: '', fleteUsd: '', seguro: '', segAuto: true, saFob: '', saPct: '', bruto: '', neto: '', dias: '' });
+  if (C.reg !== 'IM05') C.flete = '';
+  $$('[data-k]').forEach(el => { if (!['cusd', 'creal', 'flete'].includes(el.dataset.k) || (el.dataset.k === 'flete' && C.reg !== 'IM05')) el.value = ''; });
+  $('#segAuto').checked = true; $('#inSeg').disabled = true; elegir(null); calcular();
+}
+
+// ---------- importador (solo IM05) ----------
+const vecesAnio = ruc => (IMPS.find(x => x.ruc === ruc)?.im05 || 0) + ((USOS[ANIO] || {})[ruc] || 0);
+const ORD = x => x.orden > 0 ? x.orden : 1e9;   // el orden que eligió Jorge manda
+function ordenados() { return [...IMPS].sort((a, b) => ORD(a) - ORD(b) || vecesAnio(b.ruc) - vecesAnio(a.ruc) || a.n.localeCompare(b.n)); }
+const sinTilde = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function pintarLista() {
+  const q = sinTilde($('#impBusca').value.trim()), L = $('#impLista');
+  if (!IMPS.length) { L.innerHTML = '<div class="sep">Sin importadores: cargalos en Ajustes</div>'; return; }
+  const todos = ordenados(), filtra = x => !q || sinTilde(x.n + ' ' + x.corto + ' ' + x.ruc).includes(q);
+  const fila = x => `<button data-ruc="${x.ruc}"><div class="m"><b>${esc(x.n)}</b><span>${x.ruc}</span></div></button>`;
+  const lista = todos.filter(filtra);
+  L.innerHTML = q ? (lista.map(fila).join('') || '<div class="sep">No hay coincidencias</div>')
+    : lista.map(fila).join('');
+  L.querySelectorAll('[data-ruc]').forEach(b => b.onclick = () => { elegir(IMPS.find(x => x.ruc === b.dataset.ruc)); L.classList.remove('on'); });
+}
+function elegir(x) { IMP = x || null; $('#impBusca').value = IMP ? IMP.n : ''; $('#impBusca').style.borderColor = ''; }
+$('#impBusca').addEventListener('focus', () => { if (IMP) $('#impBusca').select(); pintarLista(); $('#impLista').classList.add('on'); $('#impLista').scrollTop = 0; });
+$('#impBusca').addEventListener('input', () => { IMP = null; pintarLista(); $('#impLista').classList.add('on'); });
+$('#impBusca').addEventListener('blur', () => setTimeout(() => { $('#impLista').classList.remove('on'); if (!IMP) $('#impBusca').value = ''; }, 200));
+$('#impX').onclick = () => { elegir(null); $('#impBusca').focus(); };
+
+// ---------- Agregar al mensaje ----------
+function agregar() {
+  if (!IMP) { toast('Elegí el importador'); $('#impBusca').style.borderColor = 'var(--err)'; return; }
+  if (!R || !R.T || !R.total) { toast('Falta el cálculo: valor y cambios'); return; }
+  ITEMS.push({ ruc: IMP.ruc, corto: IMP.corto, total: R.total, iva: R.H.iva, tasa: R.T.total });
+  guardar('items', ITEMS);
+  const u = USOS[ANIO] = USOS[ANIO] || {}; u[IMP.ruc] = (u[IMP.ruc] || 0) + 1; guardar('usos', USOS);
+  toast(`Agregado: ${fmt(mil(R.total))} para ${may(IMP.corto)}`);
+  C.valor = ''; C.neto = ''; $('[data-k="valor"]').value = ''; $('[data-k="neto"]').value = '';
+  elegir(null); calcular(); pintarBadge();
+}
+function pintarBadge() { const b = $('#badge'); b.hidden = !ITEMS.length; b.textContent = ITEMS.length; }
+
+// ---------- WHATSAPP (IM05) ----------
+function mensajeIM05() {
+  if (!ITEMS.length) return '';
+  const iva = mil(ITEMS.reduce((a, x) => a + x.iva, 0));
+  return ITEMS.map(x => `${fmt(mil(x.total))} para ${may(x.corto)} ${x.ruc}`).join('\n') + `\nIva ${fmt(iva / 1000)}mil`;
+}
+function pintarWA() {
+  pintarBadge();
+  $('#items').innerHTML = ITEMS.length ? ITEMS.map((x, i) => `<div class="item"><div class="m"><input value="${esc(may(x.corto))}" data-i="${i}"><span>RUC ${x.ruc} · IVA desp. ${fmt(x.iva)}</span></div><div class="v">${fmt(mil(x.total))}<small>calculado ${fmt(x.total)}</small></div><button class="q" data-q="${i}" aria-label="Quitar">×</button></div>`).join('')
+    : '<p class="ayuda">Todavía no agregaste nada. En Cálculo, con IM05, elegí el importador y tocá Agregar.</p>';
+  $$('#items [data-i]').forEach(el => el.addEventListener('input', () => {
+    const x = ITEMS[el.dataset.i]; x.corto = el.value.trim() || x.corto; guardar('items', ITEMS);
+    const imp = IMPS.find(y => y.ruc === x.ruc); if (imp) { imp.corto = x.corto; imp.cambiado = true; guardar('imps', IMPS); }   // se recuerda
+    $('#wPrev').textContent = mensajeIM05();
+  }));
+  $$('#items [data-q]').forEach(b => b.onclick = () => { ITEMS.splice(+b.dataset.q, 1); guardar('items', ITEMS); pintarWA(); });
+  $('#wPrev').textContent = mensajeIM05() || '—';
+  pintarCanon();
+}
+// ---------- Canon: ½ jornal por despacho + tasas ----------
+const CN = { desp: '', tasas: '', manualD: false, manualT: false };
+const medioJornal = () => N.gs(d(AJ.canon).entre(5));
+const gsIn = s => { const v = num(String(s || '').trim().replace(/\./g, '').replace(',', '.')); return v ? N.gs(v) : 0; };
+function canon() {
+  const desp = CN.manualD ? (parseInt(CN.desp) || 0) : ITEMS.length;
+  const tasas = CN.manualT ? gsIn(CN.tasas) : ITEMS.reduce((a, x) => a + (x.tasa || 0), 0);
+  const jor = desp * medioJornal();
+  return { desp, tasas, jor, total: jor + tasas, red: mil(jor + tasas) };
+}
+function pintarCanon() {
+  const c = canon(), ed = $('#cnDesp'), et = $('#cnTasas');
+  if (document.activeElement !== ed) ed.value = c.desp || '';
+  if (document.activeElement !== et) et.value = c.tasas ? fmt(c.tasas) : '';
+  $('#cnJornal').value = fmt(medioJornal());
+  $('#cnDe').textContent = CN.manualT ? '· a mano' : (ITEMS.length ? '· de los cálculos' : '');
+  $('#cnDet').innerHTML = `<tr><td>Jornales<small>${c.desp} × ${fmt(medioJornal())}</small></td><td>${gsTxt(c.jor)}</td></tr>` +
+    `<tr><td>Tasas portuarias</td><td>${gsTxt(c.tasas)}</td></tr>` +
+    `<tr><td>Total exacto</td><td>${gsTxt(c.total)}</td></tr>` +
+    `<tr class="tot"><td>Total canon<small>redondeado hacia arriba</small></td><td>${gsTxt(c.red)}</td></tr>`;
+}
+$('#cnDesp').addEventListener('input', e => { CN.desp = e.target.value; CN.manualD = e.target.value.trim() !== ''; pintarCanon(); });
+$('#cnTasas').addEventListener('input', e => { CN.tasas = e.target.value; CN.manualT = e.target.value.trim() !== ''; pintarCanon(); });
+$('#cnTasas').addEventListener('change', e => { const v = gsIn(e.target.value); if (v) e.target.value = fmt(v); });
+async function copiarTexto(m, aviso) {
+  try { await navigator.clipboard.writeText(m); }
+  catch (e) { const t = document.createElement('textarea'); t.value = m; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); }
+  toast(aviso);
+}
+function copiarCanon() { const c = canon(); if (!c.total) { toast('Falta la cantidad de despachos o las tasas'); return; } copiarTexto(fmt(c.red), 'Copiado: ' + fmt(c.red)); }
+async function copiar() {
+  const m = mensajeIM05(); if (!m) { toast('La lista está vacía'); return; }
+  copiarTexto(m, 'Mensaje copiado');
+}
+function vaciar() { if (!ITEMS.length) return; if (!confirm('¿Vaciar la lista del mensaje?')) return; ITEMS = []; guardar('items', ITEMS); Object.assign(CN, { desp: '', tasas: '', manualD: false, manualT: false }); pintarWA(); }
+
+// ---------- cotización ----------
+/* cotizacion.json: {"dias": [{"fecha": "05/11/2026", "usd": "5.868,31", "brl": "1.095,93"}, ...]} (más nuevo primero).
+   KITAPP usa la del BCP del día hábil anterior: "dias[0]" ya es esa. Se puede elegir otro día o escribir a mano. */
+let DIA = 0;
+const diasCot = () => COT ? (COT.dias && COT.dias.length ? COT.dias : [{ fecha: COT.fecha, usd: COT.usd, brl: COT.brl }]) : [];
+function pintarCot() {
+  const L = diasCot();
+  if (!L.length) { $('#cot').innerHTML = '<span class="pill g">Sin cotización guardada</span> escribí el cambio a mano'; return; }
+  const x = L[Math.min(DIA, L.length - 1)];
+  $('#cot').innerHTML = `<select id="cotDia" class="pill g" style="border:none;font:inherit;font-weight:700;padding:5px 8px">${L.map((y, k) => `<option value="${k}" ${k === DIA ? 'selected' : ''}>BCP ${esc(y.fecha)}${k === 0 ? ' · KITAPP' : ''}</option>`).join('')}</select> USD ${esc(x.usd)}${x.brl ? ' · R$ ' + esc(x.brl) : ''}`;
+  $('#cotDia').onchange = e => { DIA = +e.target.value; pintarCot(); usarCot(true); };
+}
+function usarCot(forzar) {
+  const L = diasCot(); if (!L.length) return;
+  const x = L[Math.min(DIA, L.length - 1)];
+  for (const [k, v] of [['cusd', x.usd], ['creal', x.brl]]) {
+    if (!v) continue;
+    const el = $(`[data-k="${k}"]`); if (forzar || !el.value) { el.value = v; C[k] = v; }
+  }
+  calcular(); if (forzar) toast('Cambio del BCP del ' + x.fecha + (DIA === 0 ? ' (el de KITAPP)' : ''));
+}
+// lista de importadores publicada con la web app (datos públicos del RUC)
+async function leerImps() {
+  try {
+    const r = await fetch('importadores.json', { cache: 'no-store' }); if (!r.ok) return;
+    const j = await r.json(), L = (j.importadores || []).filter(x => x.ruc && x.n); if (!L.length) return;
+    const viejos = Object.fromEntries(IMPS.map(x => [x.ruc, x]));
+    const nuevos = L.map(x => ({ ruc: String(x.ruc), n: String(x.n), corto: (viejos[x.ruc] && viejos[x.ruc].cambiado) ? viejos[x.ruc].corto : (x.corto || String(x.n).split(' ')[0].toLowerCase()), cambiado: !!(viejos[x.ruc] && viejos[x.ruc].cambiado), orden: +x.orden || 0, im05: 0 }));
+    const rucs = new Set(nuevos.map(x => x.ruc));
+    IMPS = nuevos.concat(IMPS.filter(x => x.manual && !rucs.has(x.ruc)));   // los cargados a mano quedan
+    guardar('imps', IMPS); guardar('imps_fecha', j.actualizado || '');
+  } catch (e) { /* sin internet: queda la última */ }
+}
+async function leerCot() {
+  try {
+    const r = await fetch('cotizacion.json', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    if (j && ((j.dias && j.dias.length) || (j.usd && j.fecha))) { COT = j; DIA = 0; guardar('cot', j); pintarCot(); usarCot(false); }
+  } catch (e) { /* sin internet: queda la última guardada */ }
+}
+
+// ---------- ajustes ----------
+function infoImps() { $('#ajImpInfo').textContent = IMPS.length ? `${IMPS.length} importadores cargados` + (guardado('imps_fecha', '') ? ' · lista del ' + guardado('imps_fecha', '') : '') : 'Sin lista todavía: se baja sola con internet.'; }
+function abrirAjustes() { $('#ajCanon').value = fmt(AJ.canon); $('#ajSeg').value = String(AJ.seg).replace('.', ','); $('#version').textContent = 'Versión ' + VERSION; infoImps(); $('#mAjustes').classList.add('on'); }
+function cerrarAjustes() { $('#mAjustes').classList.remove('on'); }
+function guardarAjustes() {
+  const c = num(String($('#ajCanon').value).replace(/\./g, '').replace(',', '.')), s = num($('#ajSeg').value);
+  if (!c || c.cero || !s || s.cero) { toast('Revisá los números'); return; }
+  AJ.canon = N.gs(c); AJ.seg = s.toString(); guardar('ajustes', AJ);
+  pintarSeg(); cerrarAjustes(); calcular(); toast('Ajustes guardados');
+}
+$('#ajImpFile').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try {
+    const j = JSON.parse(await f.text()), L = (j.importadores || j).filter(x => x.ruc && x.n);
+    if (!L.length) throw new Error();
+    const cortos = Object.fromEntries(IMPS.map(x => [x.ruc, x.corto]));      // los nombres que cambiaste quedan
+    IMPS = L.map(x => ({ ruc: String(x.ruc), n: String(x.n), corto: cortos[x.ruc] || x.corto || String(x.n).split(' ')[0].toLowerCase(), im05: +x.im05 || 0 }));
+    guardar('imps', IMPS); guardar('imps_fecha', j.generado || ''); infoImps(); toast(IMPS.length + ' importadores cargados');
+  } catch (err) { toast('Ese archivo no es la lista de importadores'); }
+  e.target.value = '';
+};
+function impManual() {
+  const n = (prompt('Nombre del importador (como en KITAPP)') || '').trim(); if (!n) return;
+  const ruc = (prompt('RUC sin guión (ej. 801587166)') || '').replace(/\D/g, ''); if (!ruc) return;
+  if (IMPS.some(x => x.ruc === ruc)) { toast('Ese RUC ya está'); return; }
+  const corto = (prompt('Nombre corto para el mensaje', n.split(' ')[0].toLowerCase()) || n).trim();
+  IMPS.push({ ruc, n: n.toUpperCase(), corto, im05: 0, manual: true, cambiado: true }); guardar('imps', IMPS); infoImps(); toast('Importador agregado');
+}
+function pintarSeg() { const s = d(AJ.seg); $('#lSegPct').textContent = fmt(s, s.redondear(0, 'DOWN').cmp(s) ? 2 : 0) + ' %'; }
+
+// ---------- inicio ----------
+$('[data-k="flete"]').value = C.flete;
+pintarSeg(); pintarCot(); usarCot(false); pintarCalc(); pintarBadge(); leerCot(); leerImps();
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{
+ "actualizado": "06/11/2026",
+ "nota": "orden = lugar en la lista de más usados (1 = primero). Sin orden: van después, por uso en el celular y nombre.",
+ "importadores": [
+  {
+   "ruc": "800239474",
+   "n": "AMORIM & CIA S.A.",
+   "corto": "amorim"
+  },
+  {
+   "ruc": "801138892",
+   "n": "ANMIC S.A.",
+   "corto": "anmic"
+  },
+  {
+   "ruc": "800514050",
+   "n": "ARAMI POTY SOCIEDAD ANONIMA",
+   "corto": "arami"
+  },
+  {
+   "ruc": "801468744",
+   "n": "BELLA CASA SOCIEDAD ANONIMA",
+   "corto": "bella"
+  },
+  {
+   "ruc": "800188900",
+   "n": "CDD CONSTRUCCIONES S.A.",
+   "corto": "cdd"
+  },
+  {
+   "ruc": "800216091",
+   "n": "DELIA ELISA SA",
+   "corto": "delia"
+  },
+  {
+   "ruc": "800496655",
+   "n": "DESTRO MACRO S.R.L.",
+   "corto": "destro"
+  },
+  {
+   "ruc": "33400997",
+   "n": "GALEANO ALVARENGA EVER HERIB",
+   "corto": "Herib"
+  },
+  {
+   "ruc": "75189887",
+   "n": "GARCIA ANDRE ISABELA",
+   "corto": "Isabela"
+  },
+  {
+   "ruc": "801391474",
+   "n": "HERA AGRICOLA S.A.",
+   "corto": "hera"
+  },
+  {
+   "ruc": "42281172",
+   "n": "MARTINEZ AGUILAR MIGUEL ANGEL",
+   "corto": "Angel"
+  },
+  {
+   "ruc": "800702883",
+   "n": "MAVEQ  S.A",
+   "corto": "maveq"
+  },
+  {
+   "ruc": "801608198",
+   "n": "MC IMPORT. EXPORT. E.A.S.",
+   "corto": "mc"
+  },
+  {
+   "ruc": "47231670",
+   "n": "MONTANIA ALMADA CARLOS FRANCISCO",
+   "corto": "Francisco"
+  },
+  {
+   "ruc": "800376471",
+   "n": "PAMPA INGENIERIA SRL",
+   "corto": "pampa"
+  },
+  {
+   "ruc": "800529618",
+   "n": "PANDOLFO SOCIEDAD ANONIMA",
+   "corto": "pandolfo"
+  },
+  {
+   "ruc": "65359593",
+   "n": "PAZ GARCIA GIOVANI",
+   "corto": "giovanni"
+  },
+  {
+   "ruc": "800850718",
+   "n": "ROAD SOCIEDAD ANONIMA",
+   "corto": "road"
+  },
+  {
+   "ruc": "65967453",
+   "n": "SCHWENDLER FRANTZ MATIAS",
+   "corto": "Matias"
+  },
+  {
+   "ruc": "801587166",
+   "n": "SDG IMPORT EXPORT E.A.S. UNIPERSONAL",
+   "corto": "sdg"
+  },
+  {
+   "ruc": "42843251",
+   "n": "SOARES DE VION ADRIANA",
+   "corto": "Adriana"
+  },
+  {
+   "ruc": "800830075",
+   "n": "TAPIZCENTER SOCIEDAD ANONIMA",
+   "corto": "tapizcenter"
+  },
+  {
+   "ruc": "52666115",
+   "n": "VILLASANTI GONZALEZ GLEN HAWART",
+   "corto": "Hawart"
+  }
+ ]
+}
