@@ -95,7 +95,8 @@ details[open] summary::before{transform:rotate(90deg)}
 .est.sup{background:color-mix(in srgb,var(--warn) 22%,transparent);color:var(--warn)}
 .sel{position:relative}
 .sel .in{text-align:left;font-size:17px;padding-right:44px}
-.sel .x{position:absolute;right:6px;top:6px;width:40px;height:40px;border:none;background:none;color:var(--mut);font-size:22px}
+.sel .x{position:absolute;right:6px;top:6px;width:40px;height:40px;border:none;background:none;color:var(--mut);display:grid;place-items:center;transition:transform .2s}
+.sel.abierta .x{transform:rotate(180deg)}
 .lista{margin-top:6px;border:1px solid var(--line);border-radius:14px;background:#121a45;max-height:calc(5 * 58px + 2px);overflow-y:auto;display:none}
 .lista.on{display:block}
 .lista button{display:flex;width:100%;align-items:center;gap:10px;text-align:left;background:none;border:none;border-bottom:1px solid var(--line);min-height:58px;padding:8px 14px}
@@ -147,8 +148,9 @@ details[open] summary::before{transform:rotate(90deg)}
    <div class="seg" id="sMon"><button data-v="DOL">USD</button><button data-v="REAL">R$</button></div>
   </div>
   <div class="campo" id="cImp"><p class="lb">Importador</p>
-   <div class="sel"><input class="in" id="impBusca" placeholder="Elegí el importador…" autocomplete="off"><button class="x" id="impX" aria-label="Borrar">×</button></div>
-   <div class="lista" id="impLista"></div></div>
+   <div class="sel"><input class="in" id="impBusca" placeholder="Elegí o escribí uno nuevo…" autocomplete="off" autocapitalize="words"><button class="x" id="impX" aria-label="Ver la lista"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+   <div class="lista" id="impLista"></div>
+   <div class="campo" id="cRucNuevo" style="display:none"><p class="lb">RUC del importador nuevo (sin guión)</p><input class="in" id="rucNuevo" inputmode="numeric" placeholder="801587166"></div></div>
   <div class="campo"><p class="lb" id="lValor">Valor factura (FOB) USD</p><input class="in" data-k="valor" inputmode="decimal" placeholder="0,00"></div>
   <div class="campo" id="cFlete"><p class="lb" id="lFlete">Flete USD</p><input class="in" data-k="flete" inputmode="decimal" placeholder="0,00"><p class="ayuda" id="aFlete"></p></div>
   <div class="campo" id="cFleteUsd"><p class="lb">Flete del CRT en USD</p><input class="in" data-k="fleteUsd" inputmode="decimal" placeholder="0,00"><p class="ayuda" id="aFleteUsd"></p></div>
@@ -225,14 +227,14 @@ details[open] summary::before{transform:rotate(90deg)}
 <script src="nucleo.js"></script>
 <script>
 'use strict';
-const N = window.Nucleo, { d, fmt } = N, VERSION = '1.5 · 06/11/2026';
+const N = window.Nucleo, { d, fmt } = N, VERSION = '1.7 · 07/11/2026';
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const guardado = (k, def) => { try { const v = localStorage.getItem('zc_' + k); return v == null ? def : JSON.parse(v); } catch (e) { return def; } };
 const guardar = (k, v) => { try { localStorage.setItem('zc_' + k, JSON.stringify(v)); } catch (e) {} };
 const ANIO = new Date().getFullYear();
 
 const AJ = Object.assign({ canon: 292692, seg: '1' }, guardado('ajustes', {}));
-const C = { reg: 'IM05', mon: 'DOL', segAuto: true, dias: '', flete: '30,00' };
+const C = { reg: 'IM05', mon: 'DOL', segAuto: true, dias: '', flete: '' };
 let COT = guardado('cot', null);              // {fecha, usd, brl, fuente}
 let IMPS = guardado('imps', []);              // [{ruc, n, corto, im05}] de Zzzz o a mano
 let USOS = guardado('usos', {});              // {anio: {ruc: veces agregado en el celular}}
@@ -339,8 +341,8 @@ function pintarRes() {
 
 function limpiar() {
   Object.assign(C, { valor: '', fleteUsd: '', seguro: '', segAuto: true, saFob: '', saPct: '', bruto: '', neto: '', dias: '' });
-  if (C.reg !== 'IM05') C.flete = '';
-  $$('[data-k]').forEach(el => { if (!['cusd', 'creal', 'flete'].includes(el.dataset.k) || (el.dataset.k === 'flete' && C.reg !== 'IM05')) el.value = ''; });
+  C.flete = '';
+  $$('[data-k]').forEach(el => { if (!['cusd', 'creal'].includes(el.dataset.k)) el.value = ''; });
   $('#segAuto').checked = true; $('#inSeg').disabled = true; elegir(null); calcular();
 }
 
@@ -349,26 +351,39 @@ const vecesAnio = ruc => (IMPS.find(x => x.ruc === ruc)?.im05 || 0) + ((USOS[ANI
 const ORD = x => x.orden > 0 ? x.orden : 1e9;   // el orden que eligió Jorge manda
 function ordenados() { return [...IMPS].sort((a, b) => ORD(a) - ORD(b) || vecesAnio(b.ruc) - vecesAnio(a.ruc) || a.n.localeCompare(b.n)); }
 const sinTilde = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function flecha() { $('.sel').classList.toggle('abierta', $('#impLista').classList.contains('on')); }
+setInterval(flecha, 150);
 function pintarLista() {
   const q = sinTilde($('#impBusca').value.trim()), L = $('#impLista');
   if (!IMPS.length) { L.innerHTML = '<div class="sep">Sin importadores: cargalos en Ajustes</div>'; return; }
   const todos = ordenados(), filtra = x => !q || sinTilde(x.n + ' ' + x.corto + ' ' + x.ruc).includes(q);
   const fila = x => `<button data-ruc="${x.ruc}"><div class="m"><b>${esc(x.n)}</b><span>${x.ruc}</span></div></button>`;
   const lista = todos.filter(filtra);
-  L.innerHTML = q ? (lista.map(fila).join('') || '<div class="sep">No hay coincidencias</div>')
+  L.innerHTML = q ? (lista.map(fila).join('') || '<div class="sep">Nuevo: escribí el RUC abajo</div>')
     : lista.map(fila).join('');
   L.querySelectorAll('[data-ruc]').forEach(b => b.onclick = () => { elegir(IMPS.find(x => x.ruc === b.dataset.ruc)); L.classList.remove('on'); });
 }
-function elegir(x) { IMP = x || null; $('#impBusca').value = IMP ? IMP.n : ''; $('#impBusca').style.borderColor = ''; }
+function elegir(x) { IMP = x || null; $('#impBusca').value = IMP ? IMP.n : ''; $('#impBusca').style.borderColor = ''; verRuc(); }
+// la casilla de RUC aparece solo si se escribió un nombre a mano (sin elegir de la lista)
+function verRuc() { const nuevo = !IMP && $('#impBusca').value.trim() !== ''; $('#cRucNuevo').style.display = nuevo ? '' : 'none'; if (!nuevo) $('#rucNuevo').value = ''; }
 $('#impBusca').addEventListener('focus', () => { if (IMP) $('#impBusca').select(); pintarLista(); $('#impLista').classList.add('on'); $('#impLista').scrollTop = 0; });
-$('#impBusca').addEventListener('input', () => { IMP = null; pintarLista(); $('#impLista').classList.add('on'); });
-$('#impBusca').addEventListener('blur', () => setTimeout(() => { $('#impLista').classList.remove('on'); if (!IMP) $('#impBusca').value = ''; }, 200));
-$('#impX').onclick = () => { elegir(null); $('#impBusca').focus(); };
+$('#impBusca').addEventListener('input', () => { IMP = null; pintarLista(); $('#impLista').classList.add('on'); verRuc(); });
+$('#impBusca').addEventListener('blur', () => setTimeout(() => $('#impLista').classList.remove('on'), 200));
+$('#impX').onmousedown = e => e.preventDefault();
+$('#impX').onclick = () => { const L = $('#impLista'); if (L.classList.contains('on')) { L.classList.remove('on'); $('#impBusca').blur(); } else $('#impBusca').focus(); };
 
 // ---------- Agregar al mensaje ----------
 function agregar() {
-  if (!IMP) { toast('Elegí el importador'); $('#impBusca').style.borderColor = 'var(--err)'; return; }
+  const nombre = $('#impBusca').value.trim();
+  if (!IMP && !nombre) { toast('Elegí el importador'); $('#impBusca').style.borderColor = 'var(--err)'; return; }
   if (!R || !R.T || !R.total) { toast('Falta el cálculo: valor y cambios'); return; }
+  if (!IMP) {                                   // importador nuevo escrito a mano: queda guardado en el celular
+    const ruc = $('#rucNuevo').value.replace(/\D/g, '');
+    if (ruc.length < 6) { toast('Escribí el RUC del importador nuevo'); $('#rucNuevo').style.borderColor = 'var(--err)'; $('#rucNuevo').focus(); return; }
+    $('#rucNuevo').style.borderColor = '';
+    IMP = IMPS.find(x => x.ruc === ruc);
+    if (!IMP) { IMP = { ruc, n: nombre.toUpperCase(), corto: may(nombre.split(/\s+/)[0]), im05: 0, manual: true, cambiado: true }; IMPS.push(IMP); guardar('imps', IMPS); }
+  }
   ITEMS.push({ ruc: IMP.ruc, corto: IMP.corto, total: R.total, iva: R.H.iva, tasa: R.T.total });
   guardar('items', ITEMS);
   const u = USOS[ANIO] = USOS[ANIO] || {}; u[IMP.ruc] = (u[IMP.ruc] || 0) + 1; guardar('usos', USOS);
@@ -506,7 +521,6 @@ function impManual() {
 function pintarSeg() { const s = d(AJ.seg); $('#lSegPct').textContent = fmt(s, s.redondear(0, 'DOWN').cmp(s) ? 2 : 0) + ' %'; }
 
 // ---------- inicio ----------
-$('[data-k="flete"]').value = C.flete;
 pintarSeg(); pintarCot(); usarCot(false); pintarCalc(); pintarBadge(); leerCot(); leerImps();
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
